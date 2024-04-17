@@ -1,0 +1,9 @@
+label {
+  display: block;
+}
+
+.explanation {
+  font-size: 0.5rem;
+  color: red;
+}
+
