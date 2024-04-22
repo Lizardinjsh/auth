@@ -19,21 +19,21 @@ class Validator {
    }
 
    public static function email($data) {
-    //return filter_var($data, FILTER_VALIDATE_EMAIL);
+      return filter_var($data, FILTER_VALIDATE_EMAIL);
    }
 
    public static function password($data) {
-     $miniLenght = 8;
+      $minLength = 8;
+      
+      $uppercaseRegex = '/[A-Z]/';
+      $lowercaseRegex = '/[a-z]/';
+      $numberRegex = '/[0-9]/';
+      $specialCharRegex = '/[!@#$%^&*()\-_=+{};:,<.>]/';
 
-     $uppercaseRegex = '/[A-Z]/';
-     $lowercaseRegex = '/[a-z]/';
-     $numberRegex = '/[0-9]/';
-     $specialCharRegex = '/[!@#$%^&*()\-_=+{};:,<.>]/';
-
-     return strlen($data) >= $miniLenght &&
-            preg_match($uppercaseRegex, $data) &&
-            preg_match($lowercaseRegex, $data) &&
-            preg_match($numberRegex, $data) &&
-            preg_match($specialCharRegex, $data);
+      return  strlen($data) >= $minLength &&
+              preg_match($uppercaseRegex, $data) &&
+              preg_match($lowercaseRegex, $data) &&
+              preg_match($numberRegex, $data) &&
+              preg_match($specialCharRegex, $data);
    }
 }

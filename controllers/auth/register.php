@@ -1,44 +1,46 @@
 <?php
 
-require "Validator.php";
-require "Database.php";
+guest();
+
+require "controllers/Core/Validator.php";
+require "controllers/Core/Database.php";
 $config = require("config.php");
-$db = new Database($config);
 
-if($_SERVER["REQUEST_METHOD"] == "POST") {
-    $db = new Database($config);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  $db = new Database($config);
 
-    $errors = [];
+  $errors = [];
 
-    if (Validator::email($_POST)) {
-        $errors["email"] = "Invalid email format";
-    }
-    if (!Validator::password($_POST["password"])) {
-        $errors = "Password might be invalid";
-    }
+  if (!Validator::email($_POST["email"])) {
+    $errors["email"] = "Nepareiz epasta formāts";
+  }
+  if (!Validator::password($_POST["password"])) {
+    $errors["password"] = "Parolē ir nepilnības";
+  }
+  
+  $query = "SELECT * FROM users WHERE email = :email";
+  $params = [":email" => $_POST["email"]];
+  $result = $db->execute($query, $params)->fetch();
 
-    $query = "SELECT * FROM users WHERE = :email";
-    $params = [":email" => $_POST["email"]];
-    $result = $db->execute($query, $params)->fetch();
-    password_verify($_POST["password"], $user["password"]);
+  if ($result) {
+    $errors["email"] = "Konts jau pastāv";
+  }
 
-    if ($result) {
-        $errors["email"] = "Konts jau pastav";
-    }
+  if (empty($errors)) {
+    $query = "INSERT INTO users (email, password) VALUES (:email, :password)";
+    $params = [
+      ":email" => $_POST["email"],
+      ":password" => password_hash($_POST["password"], PASSWORD_BCRYPT)
+    ];
+    $db->execute($query, $params);
 
-    if (empty($errors)) {
-        $query = "INSERT INTO users (email, password) VALUES (:email, password)";
-        $params = [
-            ":email" => $_POST["email"],
-            ":password" => password_hash($_POST["password"], PASSWORD_BCRYPT)
-        ];
-        $db->execute($query, $params);
-    }
+    $_SESSION["flash"] = "Tu esi registrejies cuh";
+    header("/Location: /login");
+    die();
 
-
-    $_POST["email"];
-    $_POST["password"];
+  }
 }
 
 $title = "Register";
 require "views/auth/register.view.php";
+

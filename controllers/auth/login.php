@@ -1,26 +1,37 @@
 <?php
 
-require "Validator.php";
-require "Database.php";
-$config = require("config.php");
-$db = new Database($config);
+guest();
 
-if($_SERVER["REQUEST_METHOD"] == "POST") {
-    $db = new Database($config);
+require "controllers/Core/Validator.php";
+require "controllers/Core/Database.php";
+$config = require("../Core/config.php");
 
-    $errors = [];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  $db = new Database($config);
 
-    if (Validator::email($_POST)) {
-        $errors["email"] = "Invalid email format";
-    }
+  $errors = [];
 
-    if(empty($errors)){
-        $query = "SELECT * FROM users WHERE email = :email AND password = :password";
-        $params = [
-            "email" => $_POST["email"],
-            ":password" => $_POST["password"]
-        ];
-    }
+  if (!Validator::email($_POST["email"])) {
+    $errors["email"] = "Nepareiz epasta formāts";
+  }
+
+  $query = "SELECT * FROM users WHERE email = :email";
+  $params = [
+    ":email" => $_POST["email"]
+  ];
+  $user = $db->execute($query, $params)->fetch();
+  if (!$user || !password_verify($_POST["password"], $user["password"])) {
+    $errors["email"] = "Kaut kas nav labi";
+  }
+
+  if (empty($errors)) {
+    $_SESSION["user"] = true;
+    $_SESSION["email"] = $_POST["email"];
+    header("Location: /");
+    die();
+    //echo $_SESSION["email"];
+  }
 }
+
 $title = "Login";
-require "views/auth/login.view.php";
+require "../views/auth/login.view.php";

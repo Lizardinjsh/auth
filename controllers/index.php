@@ -1,3 +1,5 @@
 <?php
 
-require "views/index.view.php";
+auth();
+
+require "../views/index.view.php";
